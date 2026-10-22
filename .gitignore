@@ -1,0 +1,30 @@
+# Gradle / Android 构建产物
+build/
+app/build/
+.gradle/
+captures/
+.externalNativeBuild/
+.cxx/
+
+# 本地产物文件
+*.apk
+*.aab
+*.idsig
+*.ap_
+*.dex
+*.class
+
+# Android Studio / IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+local.properties
+
+# 本地工具链、SDK、Gradle 发行版与下载缓存（体积大，不入库）
+.tools/
+
+# 系统与编辑器杂项
+.DS_Store
+Thumbs.db
+*.log
