@@ -7,9 +7,16 @@
 - 手机端：Android 9（API 28）及以上，需支持经典蓝牙 HID Device profile
 - 电脑端：Windows 10/11，**无需安装任何软件或驱动**
 
+## 下载
+
+- 最新安装包：[Releases 页面](https://github.com/Flowing-light-cn/gyro-mouse/releases/latest)，
+  或直接下载 [`app-release.apk`](https://github.com/Flowing-light-cn/gyro-mouse/releases/latest/download/app-release.apk)
+- 当前版本 **v0.1.1**（versionCode 2），使用调试密钥签名，仅供测试体验
+- 想自己从源码编译，见下方「构建」
+
 ## 安装
 
-1. 把 `app\build\outputs\apk\release\app-release.apk` 传到手机（数据线、微信/QQ 文件传输均可）。
+1. 下载上面的 `app-release.apk`，传到手机（数据线、微信/QQ 文件传输均可）。
 2. 手机上允许“安装未知来源应用”，安装并打开。
 3. 首次打开授予“附近的设备（蓝牙）”权限；Android 13+ 还会请求通知权限。
 
