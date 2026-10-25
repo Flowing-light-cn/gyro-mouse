@@ -70,6 +70,13 @@ $env:GRADLE_USER_HOME = "$PWD\.tools\gradle-home"
 用本机已生成的调试密钥签名（`.tools\debug.keystore`，密码 `android`）：
 
 ```powershell
+.\sign.ps1
+```
+
+也可手动执行（脚本按自身位置定位文件，所以在哪个目录执行都行；手动命令则要求当前目录就是本项目）：
+
+```powershell
+$env:ANDROID_HOME = "$PWD\.tools\sdk"
 & "$env:ANDROID_HOME\build-tools\34.0.0\apksigner.bat" sign --ks "$PWD\.tools\debug.keystore" --ks-pass pass:android --key-pass pass:android --ks-key-alias androiddebugkey --out "app\build\outputs\apk\release\app-release.apk" "app\build\outputs\apk\release\app-release-unsigned.apk"
 ```
 

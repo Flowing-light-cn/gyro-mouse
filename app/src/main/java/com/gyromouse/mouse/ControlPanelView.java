@@ -303,15 +303,17 @@ public class ControlPanelView extends View {
         c.drawLine(cx - radius, cy, cx + radius, cy, accent);
         c.drawLine(cx, cy - radius, cx, cy + radius, accent);
 
+        // 小球到圆心的距离由当前倾角决定（死区内居中，达到最大倾角时贴边），
+        // 方向由倾斜方向决定，因此倾斜过程中小球会连续地停在两者之间的任意位置。
         float maxOffset = Math.max(0, radius - dp(14));
-        float bx = cx + tiltX * maxOffset;
-        float by = cy + tiltY * maxOffset;
-        float dx = bx - cx;
-        float dy = by - cy;
-        float len = (float) Math.sqrt(dx * dx + dy * dy);
-        if (len > maxOffset && len > 0) {
-            bx = cx + dx / len * maxOffset;
-            by = cy + dy / len * maxOffset;
+        float norm = TiltController.normalizeTilt(tiltAngle);
+        float dirLen = (float) Math.sqrt(tiltX * tiltX + tiltY * tiltY);
+        float bx = cx;
+        float by = cy;
+        if (norm > 0f && dirLen > 0.0001f) {
+            float offset = maxOffset * norm;
+            bx = cx + tiltX / dirLen * offset;
+            by = cy + tiltY / dirLen * offset;
         }
 
         accent.setStyle(Paint.Style.FILL);

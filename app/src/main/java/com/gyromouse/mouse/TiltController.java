@@ -127,6 +127,15 @@ public class TiltController implements SensorEventListener {
         return new float[]{lastDirX, lastDirY, angleDeg};
     }
 
+    /**
+     * 把当前倾角（度）映射为指示器上的径向比例 0..1：
+     * 死区内为 0（小球居中），到达 MAX_TILT_DEG 时为 1（小球贴边）。
+     */
+    public static float normalizeTilt(float angleDeg) {
+        float t = (angleDeg - DEADZONE_DEG) / (MAX_TILT_DEG - DEADZONE_DEG);
+        return Math.max(0f, Math.min(1f, t));
+    }
+
     @Override
     public void onSensorChanged(SensorEvent event) {
         float x = event.values[0];
