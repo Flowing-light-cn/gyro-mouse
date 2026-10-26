@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.app.Dialog;
 import android.bluetooth.BluetoothAdapter;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -41,6 +42,8 @@ public class MainActivity extends Activity implements HidMouseService.Listener, 
     private static final int COLOR_RED = 0xFFEF5350;
     private static final int COLOR_BTN = 0xFF1B232B;
     private static final int COLOR_BORDER = 0xFF2A343D;
+    private static final int COLOR_ACCENT = 0xFF4FC3F7;
+    private static final int COLOR_BTN_SELECTED = 0xFF24313B;
 
     private TextView tvStatus;
     private TextView tvHint;
@@ -62,6 +65,12 @@ public class MainActivity extends Activity implements HidMouseService.Listener, 
         }
     };
 
+    /** 应用内语言：让本 Activity 的所有 Context 资源使用所选语言。 */
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(I18n.wrap(newBase));
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -81,7 +90,7 @@ public class MainActivity extends Activity implements HidMouseService.Listener, 
         topRow.setOrientation(LinearLayout.HORIZONTAL);
         topRow.setGravity(Gravity.CENTER_VERTICAL);
 
-        Button btnSettings = styledButton("设置");
+        Button btnSettings = styledButton(getString(R.string.action_settings));
         topRow.addView(btnSettings, new LinearLayout.LayoutParams(dp(72), dp(40)));
 
         tvStatus = new TextView(this);
@@ -91,7 +100,7 @@ public class MainActivity extends Activity implements HidMouseService.Listener, 
         tvStatus.setSingleLine(true);
         tvStatus.setEllipsize(TextUtils.TruncateAt.END);
         tvStatus.setPadding(dp(12), 0, 0, 0);
-        tvStatus.setText("正在启动…");
+        tvStatus.setText(R.string.status_starting);
         topRow.addView(tvStatus, new LinearLayout.LayoutParams(0,
                 ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
 
@@ -99,12 +108,12 @@ public class MainActivity extends Activity implements HidMouseService.Listener, 
         tvHint.setTextSize(12);
         tvHint.setTextColor(COLOR_MUTED);
         tvHint.setPadding(0, dp(6), 0, dp(10));
-        tvHint.setText("请授予蓝牙权限");
+        tvHint.setText(R.string.hint_grant_bluetooth);
 
         LinearLayout btnRow = new LinearLayout(this);
         btnRow.setOrientation(LinearLayout.HORIZONTAL);
-        btnDiscover = styledButton("电脑发现本机");
-        btnCal = styledButton("校准中位");
+        btnDiscover = styledButton(getString(R.string.action_discoverable));
+        btnCal = styledButton(getString(R.string.action_calibrate));
         LinearLayout.LayoutParams lp1 = new LinearLayout.LayoutParams(0, dp(44), 1f);
         lp1.rightMargin = dp(8);
         LinearLayout.LayoutParams lp2 = new LinearLayout.LayoutParams(0, dp(44), 1f);
@@ -136,7 +145,7 @@ public class MainActivity extends Activity implements HidMouseService.Listener, 
                 saveLayoutAndExit();
             } else {
                 HidMouseService.calibrateNow();
-                toast("已把当前姿态校准为零点");
+                toast(getString(R.string.toast_calibrated));
             }
         });
     }
@@ -144,17 +153,17 @@ public class MainActivity extends Activity implements HidMouseService.Listener, 
     private void enterEditMode() {
         editing = true;
         panel.setEditMode(true);
-        tvHint.setText("拖动按钮调整位置，拖右下角圆点缩放；完成后点“完成布局”");
-        btnDiscover.setText("重置默认");
-        btnCal.setText("完成布局");
+        tvHint.setText(R.string.hint_edit_layout);
+        btnDiscover.setText(R.string.action_reset_layout);
+        btnCal.setText(R.string.action_finish_layout);
     }
 
     private void exitEditMode() {
         editing = false;
         panel.setEditMode(false);
-        tvHint.setText("倾斜手机移动指针；按钮控制左/右/中键、滚轮、侧键");
-        btnDiscover.setText("电脑发现本机");
-        btnCal.setText("校准中位");
+        tvHint.setText(R.string.hint_ready);
+        btnDiscover.setText(R.string.action_discoverable);
+        btnCal.setText(R.string.action_calibrate);
     }
 
     private void saveLayoutAndExit() {
@@ -166,7 +175,7 @@ public class MainActivity extends Activity implements HidMouseService.Listener, 
         e.putBoolean("has_custom_layout", true);
         e.apply();
         exitEditMode();
-        toast("布局已保存");
+        toast(getString(R.string.toast_layout_saved));
     }
 
     private void resetCustomLayout() {
@@ -177,7 +186,7 @@ public class MainActivity extends Activity implements HidMouseService.Listener, 
         }
         e.putBoolean("has_custom_layout", false);
         e.apply();
-        toast("已恢复默认布局");
+        toast(getString(R.string.toast_layout_reset));
     }
 
     private void applySettings() {
@@ -214,36 +223,38 @@ public class MainActivity extends Activity implements HidMouseService.Listener, 
         content.setBackground(bg);
 
         TextView title = new TextView(this);
-        title.setText("设置");
+        title.setText(R.string.dialog_settings_title);
         title.setTextSize(18);
         title.setTextColor(COLOR_TEXT);
         title.setTypeface(Typeface.DEFAULT_BOLD);
         content.addView(title);
 
-        addSlider(content, "鼠标灵敏度", 100, prefs.getInt("speed", 40), p -> {
+        addLanguageSelector(content, dialog);
+
+        addSlider(content, getString(R.string.label_speed), 100, prefs.getInt("speed", 40), p -> {
             prefs.edit().putInt("speed", p).apply();
             HidMouseService.setSpeedLevel(p);
         });
-        addSlider(content, "滚轮灵敏度", 100, prefs.getInt("wheel_level", 75), p -> {
+        addSlider(content, getString(R.string.label_wheel_speed), 100, prefs.getInt("wheel_level", 75), p -> {
             prefs.edit().putInt("wheel_level", p).apply();
             panel.setWheelStepDp(12f + (100 - p) * 0.88f);
         });
 
         CheckBox cbInvert = new CheckBox(this);
-        cbInvert.setText("陀螺仪反向（倒置手机）");
+        cbInvert.setText(R.string.label_invert);
         cbInvert.setTextSize(14);
         cbInvert.setTextColor(COLOR_TEXT);
         cbInvert.setPadding(0, dp(10), 0, 0);
         cbInvert.setChecked(prefs.getBoolean("inverted", false));
         content.addView(cbInvert);
 
-        Button editBtn = styledButton("编辑按钮布局");
+        Button editBtn = styledButton(getString(R.string.action_edit_layout));
         LinearLayout.LayoutParams elp = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, dp(44));
         elp.topMargin = dp(14);
         content.addView(editBtn, elp);
 
-        Button done = styledButton("完成");
+        Button done = styledButton(getString(R.string.action_done));
         LinearLayout.LayoutParams dlp = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, dp(44));
         dlp.topMargin = dp(16);
@@ -269,6 +280,60 @@ public class MainActivity extends Activity implements HidMouseService.Listener, 
             int width = (int) (getResources().getDisplayMetrics().widthPixels * 0.92f);
             win.setLayout(width, ViewGroup.LayoutParams.WRAP_CONTENT);
         }
+    }
+
+    /** 语言选择：跟随系统 / 中文 / English，点选后立即重建界面生效。 */
+    private void addLanguageSelector(LinearLayout parent, Dialog dialog) {
+        TextView tv = new TextView(this);
+        tv.setText(R.string.label_language);
+        tv.setTextSize(14);
+        tv.setTextColor(COLOR_TEXT);
+        tv.setPadding(0, dp(14), 0, 0);
+        parent.addView(tv);
+
+        LinearLayout row = new LinearLayout(this);
+        row.setOrientation(LinearLayout.HORIZONTAL);
+        LinearLayout.LayoutParams rlp = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, dp(40));
+        rlp.topMargin = dp(8);
+        parent.addView(row, rlp);
+
+        String current = I18n.getMode(this);
+        String[] modes = {I18n.MODE_SYSTEM, I18n.MODE_ZH, I18n.MODE_EN};
+        int[] labels = {R.string.language_system, R.string.language_zh, R.string.language_en};
+        for (int i = 0; i < modes.length; i++) {
+            final String mode = modes[i];
+            Button b = styledButton(getString(labels[i]));
+            b.setTextSize(13);
+            boolean selected = mode.equals(current);
+            styleLanguageButton(b, selected);
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, dp(40), 1f);
+            if (i > 0) {
+                lp.leftMargin = dp(8);
+            }
+            row.addView(b, lp);
+            b.setOnClickListener(v -> switchLanguage(mode, dialog));
+        }
+    }
+
+    private void styleLanguageButton(Button b, boolean selected) {
+        GradientDrawable bg = new GradientDrawable();
+        bg.setColor(selected ? COLOR_BTN_SELECTED : COLOR_BTN);
+        bg.setCornerRadius(dp(12));
+        bg.setStroke(dp(selected ? 1.5f : 1f), selected ? COLOR_ACCENT : COLOR_BORDER);
+        b.setBackground(bg);
+        b.setTextColor(selected ? COLOR_ACCENT : COLOR_TEXT);
+    }
+
+    /** 切换语言：保存设置 → 刷新常驻通知 → 重建界面（当前界面回到主界面）。 */
+    private void switchLanguage(String mode, Dialog dialog) {
+        if (mode.equals(I18n.getMode(this))) {
+            return;
+        }
+        dialog.dismiss();
+        I18n.setMode(this, mode);
+        HidMouseService.refreshNotification();
+        recreate();
     }
 
     private void addSlider(LinearLayout parent, String label, int max, int value, IntConsumer onChange) {
@@ -327,9 +392,9 @@ public class MainActivity extends Activity implements HidMouseService.Listener, 
         if (requestCode != REQ_PERMS) return;
         if (Build.VERSION.SDK_INT >= 31
                 && checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
-            tvStatus.setText("缺少蓝牙权限");
+            tvStatus.setText(R.string.status_missing_bluetooth_permission);
             tvStatus.setTextColor(COLOR_RED);
-            tvHint.setText("请在系统设置中允许本应用使用“附近的设备/蓝牙”，然后重新打开应用");
+            tvHint.setText(R.string.hint_missing_bluetooth_permission);
             return;
         }
         startHidService();
@@ -344,7 +409,7 @@ public class MainActivity extends Activity implements HidMouseService.Listener, 
                 startService(i);
             }
         } catch (Exception e) {
-            toast("启动服务失败：" + e.getMessage());
+            toast(getString(R.string.toast_start_service_failed, String.valueOf(e.getMessage())));
         }
     }
 
@@ -354,7 +419,7 @@ public class MainActivity extends Activity implements HidMouseService.Listener, 
             i.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
             startActivity(i);
         } catch (Exception e) {
-            toast("无法开启可发现模式：" + e.getMessage());
+            toast(getString(R.string.toast_discover_failed, String.valueOf(e.getMessage())));
         }
     }
 
@@ -373,23 +438,22 @@ public class MainActivity extends Activity implements HidMouseService.Listener, 
     }
 
     @Override
-    public void onStatusChanged(String status, boolean connected) {
+    public void onStatusChanged(int statusRes, String arg, boolean connected) {
         runOnUiThread(() -> {
-            tvStatus.setText(status);
+            tvStatus.setText(arg == null ? getString(statusRes) : getString(statusRes, arg));
             tvStatus.setTextColor(connected ? COLOR_GREEN : COLOR_TEXT);
             if (editing) return;
             if (connected) {
-                tvHint.setText("倾斜手机移动指针；按钮控制左/右/中键、滚轮、侧键");
-            } else if (status.contains("等待电脑连接")) {
-                tvHint.setText("电脑操作：设置 → 蓝牙和其他设备 → 添加设备 → 蓝牙 → 选择本机\n"
-                        + "若之前配对过，请先在电脑上删除旧配对再重新配对");
+                tvHint.setText(R.string.hint_ready);
+            } else if (statusRes == R.string.st_registered) {
+                tvHint.setText(R.string.hint_pairing);
             }
         });
     }
 
     @Override
-    public void onToast(String message) {
-        runOnUiThread(() -> Toast.makeText(this, message, Toast.LENGTH_SHORT).show());
+    public void onToast(int messageRes) {
+        runOnUiThread(() -> Toast.makeText(this, messageRes, Toast.LENGTH_SHORT).show());
     }
 
     @Override

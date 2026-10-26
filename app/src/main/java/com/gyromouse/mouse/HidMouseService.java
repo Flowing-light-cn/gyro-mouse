@@ -11,6 +11,7 @@ import android.bluetooth.BluetoothHidDevice;
 import android.bluetooth.BluetoothHidDeviceAppSdpSettings;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ServiceInfo;
 import android.os.Build;
@@ -32,10 +33,14 @@ public class HidMouseService extends Service implements TiltController.Sink {
     public static final int BTN_BACK = 8;
     public static final int BTN_FORWARD = 16;
 
+    /**
+     * 状态与提示都以字符串资源 id 传递，界面按当前语言渲染，
+     * 因此切换语言后重新显示的文字不会残留旧语言。
+     */
     public interface Listener {
-        void onStatusChanged(String status, boolean connected);
+        void onStatusChanged(int statusRes, String arg, boolean connected);
 
-        void onToast(String message);
+        void onToast(int messageRes);
     }
 
     private static volatile HidMouseService instance;
@@ -82,7 +87,8 @@ public class HidMouseService extends Service implements TiltController.Sink {
     private int buttons = 0;
 
     private TiltController tilt;
-    private String lastStatus = "正在启动…";
+    private int lastStatusRes = R.string.status_starting;
+    private String lastStatusArg = null;
     private boolean destroyed = false;
 
     public static HidMouseService get() {
@@ -128,6 +134,12 @@ public class HidMouseService extends Service implements TiltController.Sink {
         return new float[]{0f, 0f, 0f};
     }
 
+    /** 语言：让服务自己拼出的文字（通知等）使用应用内所选语言。 */
+    @Override
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(I18n.wrap(base));
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -135,6 +147,14 @@ public class HidMouseService extends Service implements TiltController.Sink {
         createNotificationChannel();
         startForegroundCompat();
         initBluetooth();
+    }
+
+    /** 语言切换后刷新常驻通知与通知渠道文字（不重启 HID 连接）。 */
+    public static void refreshNotification() {
+        HidMouseService s = instance;
+        if (s == null) return;
+        s.createNotificationChannel();
+        s.updateNotification();
     }
 
     @Override
@@ -172,20 +192,20 @@ public class HidMouseService extends Service implements TiltController.Sink {
         BluetoothManager bm = (BluetoothManager) getSystemService(BLUETOOTH_SERVICE);
         adapter = bm != null ? bm.getAdapter() : null;
         if (adapter == null) {
-            status("此设备不支持蓝牙", false);
+            status(R.string.st_no_bluetooth, false);
             return;
         }
         try {
             if (!adapter.isEnabled()) {
-                status("请先打开手机蓝牙", false);
+                status(R.string.st_bluetooth_off, false);
                 return;
             }
         } catch (SecurityException e) {
-            status("缺少蓝牙权限，请重新打开应用授权", false);
+            status(R.string.st_permission_missing, false);
             return;
         }
 
-        status("正在初始化蓝牙…", false);
+        status(R.string.st_initializing, false);
         try {
             adapter.getProfileProxy(this, new BluetoothProfile.ServiceListener() {
                 @Override
@@ -201,11 +221,11 @@ public class HidMouseService extends Service implements TiltController.Sink {
                     registered = false;
                     connected = false;
                     stopTilt();
-                    status("蓝牙服务断开", false);
+                    status(R.string.st_service_disconnected, false);
                 }
             }, BluetoothProfile.HID_DEVICE);
         } catch (SecurityException e) {
-            status("缺少蓝牙权限，请重新打开应用授权", false);
+            status(R.string.st_permission_missing, false);
         }
     }
 
@@ -219,12 +239,12 @@ public class HidMouseService extends Service implements TiltController.Sink {
                     BluetoothHidDevice.SUBCLASS1_MOUSE,
                     REPORT_DESCRIPTOR);
             boolean requested = hid.registerApp(sdp, null, null, getMainExecutor(), callback);
-            status(requested ? "正在注册 HID 设备…" : "HID 注册请求失败", false);
+            status(requested ? R.string.st_registering : R.string.st_register_request_failed, false);
         } catch (SecurityException e) {
-            status("缺少蓝牙权限，请重新打开应用授权", false);
+            status(R.string.st_permission_missing, false);
         } catch (Exception e) {
             Log.e(TAG, "registerApp failed", e);
-            status("HID 注册失败：" + e.getMessage(), false);
+            status(R.string.st_register_failed, String.valueOf(e.getMessage()), false);
         }
     }
 
@@ -233,10 +253,10 @@ public class HidMouseService extends Service implements TiltController.Sink {
         public void onAppStatusChanged(BluetoothDevice pluggedDevice, boolean reg) {
             registered = reg;
             if (reg) {
-                status("HID 已注册，等待电脑连接", false);
-                toast("HID 注册成功，现在可以在电脑上配对");
+                status(R.string.st_registered, false);
+                toast(R.string.toast_hid_registered);
             } else {
-                status("HID 注册被取消", false);
+                status(R.string.st_registration_cancelled, false);
                 stopTilt();
             }
             updateNotification();
@@ -248,13 +268,13 @@ public class HidMouseService extends Service implements TiltController.Sink {
                 host = device;
                 connected = true;
                 startTilt();
-                status("已连接：" + nameOf(device), true);
-                toast("已连接电脑，倾斜手机试试");
+                status(R.string.st_connected, nameOf(device), true);
+                toast(R.string.toast_connected);
             } else if (state == BluetoothProfile.STATE_DISCONNECTED) {
                 connected = false;
                 host = null;
                 stopTilt();
-                status(registered ? "已断开，等待电脑重新连接" : "未连接", false);
+                status(registered ? R.string.st_disconnected_waiting : R.string.st_not_connected, false);
             }
             updateNotification();
         }
@@ -280,7 +300,7 @@ public class HidMouseService extends Service implements TiltController.Sink {
             connected = false;
             host = null;
             stopTilt();
-            status("电脑已断开连接", false);
+            status(R.string.st_host_disconnected, false);
             updateNotification();
         }
     };
@@ -330,7 +350,7 @@ public class HidMouseService extends Service implements TiltController.Sink {
             tilt.setInverted(pendingInverted);
         }
         if (!tilt.isAvailable()) {
-            status("未检测到重力传感器，无法倾斜控制", connected);
+            status(R.string.st_no_sensor, connected);
             return;
         }
         tilt.start();
@@ -347,48 +367,56 @@ public class HidMouseService extends Service implements TiltController.Sink {
             String n = d.getName();
             return n != null ? n : d.getAddress();
         } catch (Exception e) {
-            return "电脑";
+            return getString(R.string.host_unknown);
         }
     }
 
-    private void status(String s, boolean conn) {
-        lastStatus = s;
+    private void status(int res, boolean conn) {
+        status(res, null, conn);
+    }
+
+    private void status(int res, String arg, boolean conn) {
+        lastStatusRes = res;
+        lastStatusArg = arg;
         Listener l = listener;
         if (l != null) {
-            l.onStatusChanged(s, conn);
+            l.onStatusChanged(res, arg, conn);
         }
     }
 
     private void notifyStatus() {
         Listener l = listener;
         if (l != null) {
-            l.onStatusChanged(lastStatus, connected);
+            l.onStatusChanged(lastStatusRes, lastStatusArg, connected);
         }
     }
 
-    private void toast(String s) {
+    private void toast(int messageRes) {
         Listener l = listener;
         if (l != null) {
-            l.onToast(s);
+            l.onToast(messageRes);
         }
     }
 
     private void createNotificationChannel() {
         NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         if (nm == null) return;
-        NotificationChannel ch = new NotificationChannel(CHANNEL_ID, "蓝牙鼠标",
+        Context c = I18n.wrap(this);
+        NotificationChannel ch = new NotificationChannel(CHANNEL_ID,
+                c.getString(R.string.notif_channel_name),
                 NotificationManager.IMPORTANCE_LOW);
-        ch.setDescription("保持蓝牙 HID 连接");
+        ch.setDescription(c.getString(R.string.notif_channel_description));
         nm.createNotificationChannel(ch);
     }
 
     private Notification buildNotification() {
+        Context c = I18n.wrap(this);
         Intent intent = new Intent(this, MainActivity.class);
         PendingIntent pi = PendingIntent.getActivity(this, 0, intent,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-        return new Notification.Builder(this, CHANNEL_ID)
-                .setContentTitle("陀螺仪鼠标")
-                .setContentText(connected ? "已连接电脑" : "等待电脑连接")
+        return new Notification.Builder(c, CHANNEL_ID)
+                .setContentTitle(c.getString(R.string.app_name))
+                .setContentText(c.getString(connected ? R.string.notif_connected : R.string.notif_waiting))
                 .setSmallIcon(android.R.drawable.ic_menu_mylocation)
                 .setContentIntent(pi)
                 .setOngoing(true)

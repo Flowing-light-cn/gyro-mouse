@@ -1,4 +1,77 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    默认（英文）字符串。中文翻译见 res/values-zh/strings.xml。
+    界面语言由「设置 → 语言」控制，见 com.gyromouse.mouse.I18n。
+-->
 <resources>
-    <string name="app_name">陀螺仪鼠标</string>
+    <string name="app_name">Gyro Mouse</string>
+
+    <!-- 主界面 -->
+    <string name="action_settings">Settings</string>
+    <string name="status_starting">Starting…</string>
+    <string name="hint_grant_bluetooth">Bluetooth permission is required</string>
+    <string name="action_discoverable">Make discoverable</string>
+    <string name="action_calibrate">Calibrate center</string>
+    <string name="hint_ready">Tilt the phone to move the pointer; buttons: left/right/middle click, wheel, side buttons</string>
+    <string name="hint_edit_layout">Drag items to move them, drag the dot at the bottom-right corner to resize; tap “Finish layout” when done</string>
+    <string name="action_reset_layout">Reset to default</string>
+    <string name="action_finish_layout">Finish layout</string>
+    <string name="hint_missing_bluetooth_permission">Allow “Nearby devices / Bluetooth” for this app in the system settings, then reopen the app</string>
+    <string name="status_missing_bluetooth_permission">Bluetooth permission missing</string>
+    <string name="hint_pairing">On the computer: Settings → Bluetooth &amp; devices → Add device → Bluetooth → select this phone\nIf this phone was paired before as a normal Bluetooth device, remove it on the computer first and then pair again</string>
+
+    <!-- 设置 -->
+    <string name="dialog_settings_title">Settings</string>
+    <string name="label_speed">Pointer speed</string>
+    <string name="label_wheel_speed">Wheel speed</string>
+    <string name="label_invert">Invert tilt (phone held upside down)</string>
+    <string name="action_edit_layout">Edit button layout</string>
+    <string name="action_done">Done</string>
+    <string name="label_language">Language</string>
+    <string name="language_system">System</string>
+    <string name="language_zh">中文</string>
+    <string name="language_en">English</string>
+
+    <!-- 提示消息 -->
+    <string name="toast_calibrated">Current pose set as the zero point</string>
+    <string name="toast_layout_saved">Layout saved</string>
+    <string name="toast_layout_reset">Default layout restored</string>
+    <string name="toast_start_service_failed">Failed to start the service: %1$s</string>
+    <string name="toast_discover_failed">Cannot enable discoverable mode: %1$s</string>
+
+    <!-- 控制面板 -->
+    <string name="panel_left">Left</string>
+    <string name="panel_right">Right</string>
+    <string name="panel_wheel">Wheel</string>
+    <string name="panel_wheel_hint">Swipe up/down</string>
+    <string name="panel_wheel_tap">Tap = middle</string>
+    <string name="panel_back">Back</string>
+    <string name="panel_forward">Forward</string>
+    <string name="panel_tilt">Tilt %1$.1f°</string>
+
+    <!-- 服务状态 -->
+    <string name="st_no_bluetooth">This device does not support Bluetooth</string>
+    <string name="st_bluetooth_off">Turn on Bluetooth first</string>
+    <string name="st_permission_missing">Bluetooth permission missing, please reopen the app and grant it</string>
+    <string name="st_initializing">Initializing Bluetooth…</string>
+    <string name="st_service_disconnected">Bluetooth service disconnected</string>
+    <string name="st_registering">Registering HID device…</string>
+    <string name="st_register_request_failed">HID registration request failed</string>
+    <string name="st_register_failed">HID registration failed: %1$s</string>
+    <string name="st_registered">HID registered, waiting for the computer to connect</string>
+    <string name="st_registration_cancelled">HID registration cancelled</string>
+    <string name="st_connected">Connected: %1$s</string>
+    <string name="st_disconnected_waiting">Disconnected, waiting for the computer to reconnect</string>
+    <string name="st_not_connected">Not connected</string>
+    <string name="st_host_disconnected">The computer disconnected</string>
+    <string name="host_unknown">computer</string>
+    <string name="st_no_sensor">No gravity sensor detected, tilt control is unavailable</string>
+
+    <!-- 服务通知 -->
+    <string name="toast_hid_registered">HID registered — you can now pair from the computer</string>
+    <string name="toast_connected">Computer connected — try tilting the phone</string>
+    <string name="notif_channel_name">Bluetooth mouse</string>
+    <string name="notif_channel_description">Keeps the Bluetooth HID connection alive</string>
+    <string name="notif_connected">Computer connected</string>
+    <string name="notif_waiting">Waiting for the computer</string>
 </resources>

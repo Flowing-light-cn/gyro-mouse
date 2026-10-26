@@ -13,7 +13,6 @@ import android.view.View;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Locale;
 
 /**
  * 控制面板。每个按钮和倾角指示器都有独立的归一化位置/大小（相对屏幕宽高），
@@ -74,6 +73,15 @@ public class ControlPanelView extends View {
 
     private float wheelStepDp = 34f;
 
+    // 面板上的文字取自字符串资源，跟随「设置 → 语言」。
+    private final String labelLeft;
+    private final String labelRight;
+    private final String labelWheel;
+    private final String labelWheelHint;
+    private final String labelWheelTap;
+    private final String labelBack;
+    private final String labelForward;
+
     private final SparseIntArray pointerButton = new SparseIntArray();
     private final HashMap<Integer, Float> scrollLastY = new HashMap<>();
     private final HashMap<Integer, Float> scrollAccum = new HashMap<>();
@@ -93,6 +101,15 @@ public class ControlPanelView extends View {
         }
         text.setTextAlign(Paint.Align.CENTER);
         dash.setStyle(Paint.Style.STROKE);
+
+        Context ctx = getContext();
+        labelLeft = ctx.getString(R.string.panel_left);
+        labelRight = ctx.getString(R.string.panel_right);
+        labelWheel = ctx.getString(R.string.panel_wheel);
+        labelWheelHint = ctx.getString(R.string.panel_wheel_hint);
+        labelWheelTap = ctx.getString(R.string.panel_wheel_tap);
+        labelBack = ctx.getString(R.string.panel_back);
+        labelForward = ctx.getString(R.string.panel_forward);
     }
 
     public void setListener(Listener l) {
@@ -227,11 +244,11 @@ public class ControlPanelView extends View {
     protected void onDraw(Canvas c) {
         c.drawColor(COLOR_BG);
         drawDial(c, px(ITEM_DIAL));
-        drawButton(c, px(ITEM_LEFT), "左键", BTN_LEFT);
-        drawButton(c, px(ITEM_RIGHT), "右键", BTN_RIGHT);
+        drawButton(c, px(ITEM_LEFT), labelLeft, BTN_LEFT);
+        drawButton(c, px(ITEM_RIGHT), labelRight, BTN_RIGHT);
         drawWheel(c, px(ITEM_WHEEL));
-        drawButton(c, px(ITEM_BACK), "后退", BTN_BACK);
-        drawButton(c, px(ITEM_FORWARD), "前进", BTN_FORWARD);
+        drawButton(c, px(ITEM_BACK), labelBack, BTN_BACK);
+        drawButton(c, px(ITEM_FORWARD), labelForward, BTN_FORWARD);
         if (editMode) {
             drawEditOverlay(c);
         }
@@ -277,13 +294,13 @@ public class ControlPanelView extends View {
         text.setColor(active ? COLOR_ACCENT : COLOR_TEXT);
         text.setTextSize(sp(17));
         text.setTextAlign(Paint.Align.CENTER);
-        c.drawText("滚轮", r.centerX(), r.centerY() - dp(8), text);
+        c.drawText(labelWheel, r.centerX(), r.centerY() - dp(8), text);
 
         if (r.height() > dp(70)) {
             text.setColor(COLOR_MUTED);
             text.setTextSize(sp(11));
-            c.drawText("上下滑动", r.centerX(), r.centerY() + dp(12), text);
-            c.drawText("轻点 = 中键", r.centerX(), r.centerY() + dp(27), text);
+            c.drawText(labelWheelHint, r.centerX(), r.centerY() + dp(12), text);
+            c.drawText(labelWheelTap, r.centerX(), r.centerY() + dp(27), text);
         }
     }
 
@@ -326,7 +343,7 @@ public class ControlPanelView extends View {
         text.setColor(COLOR_MUTED);
         text.setTextSize(sp(12));
         text.setTextAlign(Paint.Align.CENTER);
-        String label = String.format(Locale.US, "倾角 %.1f°", tiltAngle);
+        String label = getContext().getString(R.string.panel_tilt, tiltAngle);
         float baseline = cy + radius + dp(18) - (text.ascent() + text.descent()) / 2f;
         c.drawText(label, cx, baseline, text);
     }

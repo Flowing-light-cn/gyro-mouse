@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 简体中文。默认（英文）字符串见 res/values/strings.xml。 -->
+<resources>
+    <string name="app_name">陀螺仪鼠标</string>
+
+    <!-- 主界面 -->
+    <string name="action_settings">设置</string>
+    <string name="status_starting">正在启动…</string>
+    <string name="hint_grant_bluetooth">请授予蓝牙权限</string>
+    <string name="action_discoverable">电脑发现本机</string>
+    <string name="action_calibrate">校准中位</string>
+    <string name="hint_ready">倾斜手机移动指针；按钮控制左/右/中键、滚轮、侧键</string>
+    <string name="hint_edit_layout">拖动按钮调整位置，拖右下角圆点缩放；完成后点“完成布局”</string>
+    <string name="action_reset_layout">重置默认</string>
+    <string name="action_finish_layout">完成布局</string>
+    <string name="hint_missing_bluetooth_permission">请在系统设置中允许本应用使用“附近的设备/蓝牙”，然后重新打开应用</string>
+    <string name="status_missing_bluetooth_permission">缺少蓝牙权限</string>
+    <string name="hint_pairing">电脑操作：设置 → 蓝牙和其他设备 → 添加设备 → 蓝牙 → 选择本机\n若之前配对过，请先在电脑上删除旧配对再重新配对</string>
+
+    <!-- 设置 -->
+    <string name="dialog_settings_title">设置</string>
+    <string name="label_speed">鼠标灵敏度</string>
+    <string name="label_wheel_speed">滚轮灵敏度</string>
+    <string name="label_invert">陀螺仪反向（倒置手机）</string>
+    <string name="action_edit_layout">编辑按钮布局</string>
+    <string name="action_done">完成</string>
+    <string name="label_language">语言</string>
+    <string name="language_system">跟随系统</string>
+    <string name="language_zh">中文</string>
+    <string name="language_en">English</string>
+
+    <!-- 提示消息 -->
+    <string name="toast_calibrated">已把当前姿态校准为零点</string>
+    <string name="toast_layout_saved">布局已保存</string>
+    <string name="toast_layout_reset">已恢复默认布局</string>
+    <string name="toast_start_service_failed">启动服务失败：%1$s</string>
+    <string name="toast_discover_failed">无法开启可发现模式：%1$s</string>
+
+    <!-- 控制面板 -->
+    <string name="panel_left">左键</string>
+    <string name="panel_right">右键</string>
+    <string name="panel_wheel">滚轮</string>
+    <string name="panel_wheel_hint">上下滑动</string>
+    <string name="panel_wheel_tap">轻点 = 中键</string>
+    <string name="panel_back">后退</string>
+    <string name="panel_forward">前进</string>
+    <string name="panel_tilt">倾角 %1$.1f°</string>
+
+    <!-- 服务状态 -->
+    <string name="st_no_bluetooth">此设备不支持蓝牙</string>
+    <string name="st_bluetooth_off">请先打开手机蓝牙</string>
+    <string name="st_permission_missing">缺少蓝牙权限，请重新打开应用授权</string>
+    <string name="st_initializing">正在初始化蓝牙…</string>
+    <string name="st_service_disconnected">蓝牙服务断开</string>
+    <string name="st_registering">正在注册 HID 设备…</string>
+    <string name="st_register_request_failed">HID 注册请求失败</string>
+    <string name="st_register_failed">HID 注册失败：%1$s</string>
+    <string name="st_registered">HID 已注册，等待电脑连接</string>
+    <string name="st_registration_cancelled">HID 注册被取消</string>
+    <string name="st_connected">已连接：%1$s</string>
+    <string name="st_disconnected_waiting">已断开，等待电脑重新连接</string>
+    <string name="st_not_connected">未连接</string>
+    <string name="st_host_disconnected">电脑已断开连接</string>
+    <string name="host_unknown">电脑</string>
+    <string name="st_no_sensor">未检测到重力传感器，无法倾斜控制</string>
+
+    <!-- 服务通知 -->
+    <string name="toast_hid_registered">HID 注册成功，现在可以在电脑上配对</string>
+    <string name="toast_connected">已连接电脑，倾斜手机试试</string>
+    <string name="notif_channel_name">蓝牙鼠标</string>
+    <string name="notif_channel_description">保持蓝牙 HID 连接</string>
+    <string name="notif_connected">已连接电脑</string>
+    <string name="notif_waiting">等待电脑连接</string>
+</resources>
